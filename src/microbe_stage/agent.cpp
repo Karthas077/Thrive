@@ -87,7 +87,6 @@ AgentEmitterComponent::luaBindings() {
         .def_readwrite("minInitialSpeed", &AgentEmitterComponent::m_minInitialSpeed)
         .def_readwrite("minEmissionAngle", &AgentEmitterComponent::m_minEmissionAngle)
         .def_readwrite("maxEmissionAngle", &AgentEmitterComponent::m_maxEmissionAngle)
-        .def_readwrite("meshName", &AgentEmitterComponent::m_meshName)
         .def_readwrite("particlesPerEmission", &AgentEmitterComponent::m_particlesPerEmission)
         .def_readwrite("particleLifetime", &AgentEmitterComponent::m_particleLifetime)
         .def_readwrite("particleScale", &AgentEmitterComponent::m_particleScale)
@@ -140,7 +139,7 @@ AgentEmitterComponent::emitAgent(
     // Scene Node
     auto agentSceneNodeComponent = make_unique<OgreSceneNodeComponent>();
     agentSceneNodeComponent->m_transform.scale = this->m_particleScale;
-    agentSceneNodeComponent->m_meshName = this->m_meshName;
+    agentSceneNodeComponent->m_meshName = AgentRegistry::getAgentMeshName(agentId);
     // Collision Hull
     auto agentRigidBodyComponent = make_unique<RigidBodyComponent>(
         btBroadphaseProxy::SensorTrigger,
@@ -185,7 +184,6 @@ AgentEmitterComponent::load(
     m_minInitialSpeed = storage.get<Ogre::Real>("minInitialSpeed", 0.0);
     m_maxEmissionAngle = storage.get<Ogre::Degree>("maxEmissionAngle");
     m_minEmissionAngle = storage.get<Ogre::Degree>("minEmissionAngle");
-    m_meshName = storage.get<Ogre::String>("meshName");
     m_particlesPerEmission = storage.get<uint16_t>("particlesPerEmission");
     m_particleLifetime = storage.get<Milliseconds>("particleLifetime");
     m_particleScale = storage.get<Ogre::Vector3>("particleScale");
@@ -201,7 +199,6 @@ AgentEmitterComponent::storage() const {
     storage.set<Ogre::Real>("minInitialSpeed", m_minInitialSpeed);
     storage.set<Ogre::Degree>("maxEmissionAngle", m_maxEmissionAngle);
     storage.set<Ogre::Degree>("minEmissionAngle", m_minEmissionAngle);
-    storage.set<Ogre::String>("meshName", m_meshName);
     storage.set<uint16_t>("particlesPerEmission", m_particlesPerEmission);
     storage.set<Milliseconds>("particleLifetime", m_particleLifetime);
     storage.set<Ogre::Vector3>("particleScale", m_particleScale);
@@ -661,7 +658,8 @@ AgentRegistry::luaBindings() {
             def("registerAgentType", &AgentRegistry::registerAgentType),
             def("getAgentDisplayName", &AgentRegistry::getAgentDisplayName),
             def("getAgentInternalName", &AgentRegistry::getAgentInternalName),
-            def("getAgentId", &AgentRegistry::getAgentId)
+            def("getAgentId", &AgentRegistry::getAgentId),
+            def("getAgentMeshName", &AgentRegistry::getAgentMeshName)
         ]
     ;
 }
@@ -672,9 +670,11 @@ namespace {
     {
         std::string internalName;
         std::string displayName;
+        std::string meshName;
     };
 }
 
+//Hidden methods for acquiring global variable
 static std::vector<AgentRegistryEntry>&
 agentRegistry() {
     static std::vector<AgentRegistryEntry> agentRegistry;
@@ -689,13 +689,15 @@ agentRegistryMap() {
 AgentId
 AgentRegistry::registerAgentType(
     const std::string& internalName,
-    const std::string& displayName
+    const std::string& displayName,
+    const std::string& meshName
 ) {
     if (agentRegistryMap().count(internalName) == 0)
     {
         AgentRegistryEntry entry;
         entry.internalName = internalName;
         entry.displayName = displayName;
+        entry.meshName = meshName;
         agentRegistry().push_back(entry);
         agentRegistryMap().emplace(std::string(internalName), agentRegistry().size());
         return agentRegistry().size();
@@ -738,4 +740,13 @@ AgentRegistry::getAgentId(
         throw std::out_of_range("Internal name of agent does not exist.");
     }
     return agentId;
+}
+
+std::string
+AgentRegistry::getAgentMeshName(
+    AgentId id
+) {
+    if (static_cast<std::size_t>(id) > agentRegistry().size())
+        throw std::out_of_range("Index of agent does not exist.");
+    return agentRegistry()[id-1].meshName;
 }

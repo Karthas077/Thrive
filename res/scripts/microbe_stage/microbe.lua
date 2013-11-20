@@ -79,7 +79,6 @@ function Microbe.createMicrobeEntity(name)
     rigidBody.properties:touch()
     local compoundEmitter = AgentEmitterComponent() -- Emitter for excess compounds
     compoundEmitter.emissionRadius = 5
-    compoundEmitter.meshName = "molecule.mesh"
     compoundEmitter.particlesPerEmission = 1
     compoundEmitter.particleLifetime = 5000
     compoundEmitter.particleScale = Vector3(0.3, 0.3, 0.3)

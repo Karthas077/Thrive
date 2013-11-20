@@ -98,7 +98,6 @@ public:
     * - AgentEmitterComponent::m_minInitialSpeed
     * - AgentEmitterComponent::m_minEmissionAngle
     * - AgentEmitterComponent::m_maxEmissionAngle
-    * - AgentEmitterComponent::m_meshName
     * - AgentEmitterComponent::m_particlesPerEmission
     * - AgentEmitterComponent::m_particleLifetime
     * - AgentEmitterComponent::m_particleScale
@@ -142,11 +141,6 @@ public:
     * Zero degrees is to the left, positive is counter-clockwise.
     */
     Ogre::Degree m_minEmissionAngle = Ogre::Degree(0);
-
-    /**
-    * @brief The mesh that new particles are created with
-    */
-    Ogre::String m_meshName;
 
     /**
     * @brief The number of particles created per emission interval
@@ -580,6 +574,7 @@ public:
     * - AgentRegistry::getAgentDisplayName
     * - AgentRegistry::getAgentInternalName
     * - AgentRegistry::getAgentId
+    * - AgentRegistry::getAgentMeshName
     * @return
     */
     static luabind::scope
@@ -594,13 +589,17 @@ public:
     * @param displayName
     *   Name to be displayed to users
     *
+    * @param meshName
+    *   Name of the model to use for this agent
+    *
     * @return
     *   Id of new agent
     */
     static AgentId
     registerAgentType(
         const std::string& internalName,
-        const std::string& displayName
+        const std::string& displayName,
+        const std::string& meshName
     );
 
     /**
@@ -643,6 +642,21 @@ public:
     static AgentId
     getAgentId(
         const std::string& internalName
+    );
+
+    /**
+    * @brief Obtains the name of the corresponding mesh
+    *
+    * @param agentId
+    *   The id of the agent to acquire the mesh name from
+    *
+    * @return
+    *   A string containing the name of the agents mesh.
+    *   If agent is not registered an out_of_range exception is thrown.
+    */
+    static std::string
+    getAgentMeshName(
+        AgentId agentId
     );
 
     AgentRegistry() = delete;

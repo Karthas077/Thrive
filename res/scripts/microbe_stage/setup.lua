@@ -33,12 +33,12 @@ local function setupCamera()
 end
 
 local function setupAgents()
-    AgentRegistry.registerAgentType("atp", "ATP")
-    AgentRegistry.registerAgentType("oxygen", "Oxygen")    
-    AgentRegistry.registerAgentType("nitrate", "Nitrate")
-    AgentRegistry.registerAgentType("glucose", "Glucose")
-    AgentRegistry.registerAgentType("co2", "CO2")
-    AgentRegistry.registerAgentType("oxytoxy", "OxyToxy NT")
+    AgentRegistry.registerAgentType("atp", "ATP", "molecule.mesh")
+    AgentRegistry.registerAgentType("oxygen", "Oxygen", "molecule.mesh")    
+    AgentRegistry.registerAgentType("nitrate", "Nitrate", "molecule.mesh")
+    AgentRegistry.registerAgentType("glucose", "Glucose", "molecule.mesh")
+    AgentRegistry.registerAgentType("co2", "CO2", "molecule.mesh")
+    AgentRegistry.registerAgentType("oxytoxy", "OxyToxy NT", "molecule.mesh")
 end
 
 local function createSpawnSystem()
@@ -77,7 +77,6 @@ local function createSpawnSystem()
         oxygenEmitter.minInitialSpeed = 2
         oxygenEmitter.minEmissionAngle = Degree(0)
         oxygenEmitter.maxEmissionAngle = Degree(360)
-        oxygenEmitter.meshName = "molecule.mesh"
         oxygenEmitter.particlesPerEmission = 1
         oxygenEmitter.particleLifeTime = 5000
         oxygenEmitter.particleScale = Vector3(0.3, 0.3, 0.3)
@@ -120,7 +119,6 @@ local function createSpawnSystem()
         glucoseEmitter.minInitialSpeed = 2
         glucoseEmitter.minEmissionAngle = Degree(0)
         glucoseEmitter.maxEmissionAngle = Degree(360)
-        glucoseEmitter.meshName = "molecule.mesh"
         glucoseEmitter.particlesPerEmission = 1
         glucoseEmitter.particleLifeTime = 5000
         glucoseEmitter.particleScale = Vector3(0.3, 0.3, 0.3)
