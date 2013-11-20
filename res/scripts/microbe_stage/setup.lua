@@ -257,7 +257,7 @@ local function setupPlayer()
     storageOrganelle2:setColour(ColourValue(0, 1, 0.5, 1))
     player:addOrganelle(0, -1, storageOrganelle2)
     -- Storage agent 3
-    local storageOrganelle3 = StorageOrganelle(AgentRegistry.getAgentId("glucose"), 100.0)
+    local storageOrganelle3 = StorageOrganelle(AgentRegistry.getAgentId("glucose"), 2.0)
     storageOrganelle3:addHex(0, 0)
     storageOrganelle3:setColour(ColourValue(0.5, 1, 0, 1))
     player:addOrganelle(-1, 0, storageOrganelle3)

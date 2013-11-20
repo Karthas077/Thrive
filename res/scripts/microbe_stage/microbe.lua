@@ -79,13 +79,9 @@ function Microbe.createMicrobeEntity(name)
     rigidBody.properties:touch()
     local compoundEmitter = AgentEmitterComponent() -- Emitter for excess compounds
     compoundEmitter.emissionRadius = 5
-    compoundEmitter.maxInitialSpeed = 0
-    compoundEmitter.minInitialSpeed = 22
-    compoundEmitter.minEmissionAngle = Degree(0)
-    compoundEmitter.maxEmissionAngle = Degree(360)
     compoundEmitter.meshName = "molecule.mesh"
     compoundEmitter.particlesPerEmission = 1
-    compoundEmitter.particleLifeTime = 10000
+    compoundEmitter.particleLifetime = 5000
     compoundEmitter.particleScale = Vector3(0.3, 0.3, 0.3)
     compoundEmitter.automaticEmission = false
     local reactionHandler = CollisionComponent()
@@ -304,14 +300,11 @@ function Microbe:storeAgent(agentId, amount)
         end
     end
     self:_updateAgentAbsorber(agentId)
-    
     if remainingAmount > 0 then -- If there is excess compounds, we will eject them
         local xAxis = self.sceneNode.transform.orientation:xAxis()
         local emissionPosition = Vector3(self.sceneNode.transform.position.x + xAxis.y*self.compoundEmitter.emissionRadius,
                                          self.sceneNode.transform.position.y - xAxis.x*self.compoundEmitter.emissionRadius,
-                                         self.sceneNode.transform.position.z)              
-        print("ParticleLifeTime equals: ")
-        print(self.compoundEmitter.particleLifeTime)
+                                         self.sceneNode.transform.position.z)
         self.compoundEmitter:emitAgent(agentId, remainingAmount, true, emissionPosition)
     end
 end

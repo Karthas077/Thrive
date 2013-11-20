@@ -112,6 +112,7 @@ AgentEmitterComponent::emitAgent(
     bool useAbsolutePosition,      // If true, the emissionPosition parameter will an absolute position for the emission
     Ogre::Vector3 emissionPosition
 ) {
+
     Ogre::Vector3 emissionOffset(0,0,0);
 
     Ogre::Degree emissionAngle{static_cast<Ogre::Real>(Game::instance().engine().rng().getDouble(
@@ -638,7 +639,7 @@ AgentAbsorberSystem::update(int) {
                 m_impl->m_agents.entities().at(entityB)
             );
         }
-        if (agent and absorber and absorber->canAbsorbAgent(agent->m_agentId) and agent->m_timeToLive > 0) {
+        if (agent and absorber and agent->m_timeToLive > 0) {
             absorber->m_absorbedAgents[agent->m_agentId] += agent->m_potency;
             agent->m_timeToLive = 0;
         }

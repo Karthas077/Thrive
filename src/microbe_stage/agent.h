@@ -134,14 +134,14 @@ public:
     *
     * Zero degrees is to the left, positive is counter-clockwise.
     */
-    Ogre::Degree m_maxEmissionAngle;
+    Ogre::Degree m_maxEmissionAngle = Ogre::Degree(360);
 
     /**
     * @brief The minimum angle at which to emit particles
     *
     * Zero degrees is to the left, positive is counter-clockwise.
     */
-    Ogre::Degree m_minEmissionAngle;
+    Ogre::Degree m_minEmissionAngle = Ogre::Degree(0);
 
     /**
     * @brief The mesh that new particles are created with
