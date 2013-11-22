@@ -185,7 +185,7 @@ public:
     void
     emitAgent(
         AgentId agentId,
-        int amount,
+        double amount,
         bool useAbsolutePosition,
         Ogre::Vector3 emissionPosition
     );

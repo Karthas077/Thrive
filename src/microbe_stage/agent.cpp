@@ -80,7 +80,7 @@ AgentEmitterComponent::luaBindings() {
             def("TYPE_NAME", &AgentEmitterComponent::TYPE_NAME)
         ]
         .def(constructor<>())
-        .def("emitAgent", ( void(AgentEmitterComponent::*)(AgentId, int, bool, Ogre::Vector3) ) &AgentEmitterComponent::emitAgent) //Cast to desired overload
+        .def("emitAgent", ( void(AgentEmitterComponent::*)(AgentId, double, bool, Ogre::Vector3) ) &AgentEmitterComponent::emitAgent) //Cast to desired overload
         .def_readwrite("agentId", &AgentEmitterComponent::m_agentId)
         .def_readwrite("emissionRadius", &AgentEmitterComponent::m_emissionRadius)
         .def_readwrite("maxInitialSpeed", &AgentEmitterComponent::m_maxInitialSpeed)
@@ -107,7 +107,7 @@ AgentEmitterComponent::emitAgent(
 void
 AgentEmitterComponent::emitAgent(
     AgentId agentId,
-    int amount,
+    double amount,
     bool useAbsolutePosition,      // If true, the emissionPosition parameter will an absolute position for the emission
     Ogre::Vector3 emissionPosition
 ) {

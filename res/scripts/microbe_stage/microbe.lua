@@ -305,22 +305,23 @@ function Microbe:storeAgent(agentId, amount)
         local emissionPosition = Vector3(self.sceneNode.transform.position.x - yAxis.x*self.compoundEmitter.emissionRadius,
                                          self.sceneNode.transform.position.y - yAxis.y*self.compoundEmitter.emissionRadius,
                                          self.sceneNode.transform.position.z)
-        local angle = math.atan2(-yAxis.x, -yAxis.y)
-        if (angle < 0) then 
-            angle = angle + 2*math.pi 
+        local particleCount = 1
+        if remainingAmount >= 3  then
+            particleCount = 3
         end
-        angle = angle * 180/math.pi
-        local minAngle = angle - 30
-        if minAngle < 0 then
-             minAngle =  minAngle +180
+        local i
+        for i = 1, particleCount do
+            local angle = math.atan2(-yAxis.x, -yAxis.y)
+            if (angle < 0) then 
+                angle = angle + 2*math.pi 
+            end
+            angle = angle * 180/math.pi
+            local minAngle = angle - 30 -- over and underflow of angles are handled automatically
+            local maxAngle = angle + 30    
+            self.compoundEmitter.minEmissionAngle = Degree(minAngle)
+            self.compoundEmitter.maxEmissionAngle = Degree(maxAngle)
+            self.compoundEmitter:emitAgent(agentId, remainingAmount/particleCount, true, emissionPosition) -- Up to two units may be lost to due rounding after division
         end
-        local maxAngle = angle + 30  
-        if maxAngle > 360 then
-             maxAngle =  maxAngle - 180
-        end        
-        self.compoundEmitter.minEmissionAngle = Degree(minAngle)
-        self.compoundEmitter.maxEmissionAngle = Degree(maxAngle)
-        self.compoundEmitter:emitAgent(agentId, remainingAmount, true, emissionPosition)
     end
 end
 
