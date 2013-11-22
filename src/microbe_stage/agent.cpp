@@ -138,7 +138,7 @@ AgentEmitterComponent::emitAgent(
     EntityId agentEntityId = Game::instance().engine().currentGameState()->entityManager().generateNewId();
     // Scene Node
     auto agentSceneNodeComponent = make_unique<OgreSceneNodeComponent>();
-    agentSceneNodeComponent->m_transform.scale = this->m_particleScale;
+    agentSceneNodeComponent->m_transform.scale = PARTICLE_SCALE;
     agentSceneNodeComponent->m_meshName = AgentRegistry::getAgentMeshName(agentId);
     // Collision Hull
     auto agentRigidBodyComponent = make_unique<RigidBodyComponent>(

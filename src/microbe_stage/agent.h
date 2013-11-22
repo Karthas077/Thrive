@@ -21,6 +21,7 @@ namespace thrive {
 using AgentId = uint16_t;
 
 static const AgentId NULL_AGENT = 0;
+static const Ogre::Vector3 PARTICLE_SCALE(0.3,0.3,0.3);
 
 AgentId
 generateAgentId();
