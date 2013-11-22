@@ -79,9 +79,10 @@ function Microbe.createMicrobeEntity(name)
     rigidBody.properties:touch()
     local compoundEmitter = AgentEmitterComponent() -- Emitter for excess compounds
     compoundEmitter.emissionRadius = 5
+    compoundEmitter.minInitialSpeed = 1
+    compoundEmitter.maxInitialSpeed = 3
     compoundEmitter.particlesPerEmission = 1
     compoundEmitter.particleLifetime = 5000
-    compoundEmitter.particleScale = Vector3(0.3, 0.3, 0.3)
     compoundEmitter.automaticEmission = false
     local reactionHandler = CollisionComponent()
     reactionHandler:addCollisionGroup("microbe")
@@ -300,10 +301,25 @@ function Microbe:storeAgent(agentId, amount)
     end
     self:_updateAgentAbsorber(agentId)
     if remainingAmount > 0 then -- If there is excess compounds, we will eject them
-        local xAxis = self.sceneNode.transform.orientation:xAxis()
-        local emissionPosition = Vector3(self.sceneNode.transform.position.x + xAxis.y*self.compoundEmitter.emissionRadius,
-                                         self.sceneNode.transform.position.y - xAxis.x*self.compoundEmitter.emissionRadius,
+        local yAxis = self.sceneNode.transform.orientation:yAxis()
+        local emissionPosition = Vector3(self.sceneNode.transform.position.x - yAxis.x*self.compoundEmitter.emissionRadius,
+                                         self.sceneNode.transform.position.y - yAxis.y*self.compoundEmitter.emissionRadius,
                                          self.sceneNode.transform.position.z)
+        local angle = math.atan2(-yAxis.x, -yAxis.y)
+        if (angle < 0) then 
+            angle = angle + 2*math.pi 
+        end
+        angle = angle * 180/math.pi
+        local minAngle = angle - 30
+        if minAngle < 0 then
+             minAngle =  minAngle +180
+        end
+        local maxAngle = angle + 30  
+        if maxAngle > 360 then
+             maxAngle =  maxAngle - 180
+        end        
+        self.compoundEmitter.minEmissionAngle = Degree(minAngle)
+        self.compoundEmitter.maxEmissionAngle = Degree(maxAngle)
         self.compoundEmitter:emitAgent(agentId, remainingAmount, true, emissionPosition)
     end
 end

@@ -79,7 +79,6 @@ local function createSpawnSystem()
         oxygenEmitter.maxEmissionAngle = Degree(360)
         oxygenEmitter.particlesPerEmission = 1
         oxygenEmitter.particleLifeTime = 5000
-        oxygenEmitter.particleScale = Vector3(0.3, 0.3, 0.3)
         oxygenEmitter.potencyPerParticle = 2.0
         local timedEmitter = TimedAgentEmitterComponent()
         timedEmitter.emitInterval = 1000
@@ -121,7 +120,6 @@ local function createSpawnSystem()
         glucoseEmitter.maxEmissionAngle = Degree(360)
         glucoseEmitter.particlesPerEmission = 1
         glucoseEmitter.particleLifeTime = 5000
-        glucoseEmitter.particleScale = Vector3(0.3, 0.3, 0.3)
         glucoseEmitter.potencyPerParticle = 1.0
         local timedEmitter = TimedAgentEmitterComponent()
         timedEmitter.emitInterval = 2000
@@ -175,7 +173,6 @@ local function setupEmitter()
     glucoseEmitter.meshName = "molecule.mesh"
     glucoseEmitter.particlesPerEmission = 1
     glucoseEmitter.particleLifeTime = 5000
-    glucoseEmitter.particleScale = Vector3(0.3, 0.3, 0.3)
     glucoseEmitter.potencyPerParticle = 3.0
     local timedEmitter = TimedAgentEmitterComponent()
     timedEmitter.emitInterval = 1000
@@ -250,7 +247,7 @@ local function setupPlayer()
     player:addOrganelle(0, 0, storageOrganelle)
     player:storeAgent(AgentRegistry.getAgentId("atp"), 20)
     -- Storage agent 2
-    local storageOrganelle2 = StorageOrganelle(AgentRegistry.getAgentId("oxygen"), 100.0)
+    local storageOrganelle2 = StorageOrganelle(AgentRegistry.getAgentId("oxygen"), 2.0)
     storageOrganelle2:addHex(0, 0)
     storageOrganelle2:setColour(ColourValue(0, 1, 0.5, 1))
     player:addOrganelle(0, -1, storageOrganelle2)
