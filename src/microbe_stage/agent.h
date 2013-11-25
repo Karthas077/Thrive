@@ -173,26 +173,6 @@ public:
     * @param amount
     *   How much of the chosen agent to emit
     *
-    * @param useAbsolutePosition
-    *   If set to true, the emissionPosition parameter will represent the
-    *   absolute position the compound will spawn at. If set to false, the
-    *   spawn position will be determined randomly according to members.
-    *
-    * @param emissionPosition
-    *   The position to spawn the compound or the position of the emitting
-    *   entity. See useAbsolute position parameter.
-    */
-    void
-    emitAgent(
-        AgentId agentId,
-        double amount,
-        bool useAbsolutePosition,
-        Ogre::Vector3 emissionPosition
-    );
-
-    /**
-    * @brief Emits a single particle.
-    *
     * @param emitterPosition
     *   The position of the entity emitting the agent.
     *   Agent position is calculated from the relative emissionPosition and
@@ -200,7 +180,9 @@ public:
     */
     void
     emitAgent(
-        Ogre::Vector3 emitterPosition
+        AgentId agentId,
+        double amount,
+        Ogre::Vector3 emissionPosition
     );
 
     void

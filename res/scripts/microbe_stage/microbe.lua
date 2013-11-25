@@ -302,9 +302,7 @@ function Microbe:storeAgent(agentId, amount)
     self:_updateAgentAbsorber(agentId)
     if remainingAmount > 0 then -- If there is excess compounds, we will eject them
         local yAxis = self.sceneNode.transform.orientation:yAxis()
-        local emissionPosition = Vector3(self.sceneNode.transform.position.x - yAxis.x*self.compoundEmitter.emissionRadius,
-                                         self.sceneNode.transform.position.y - yAxis.y*self.compoundEmitter.emissionRadius,
-                                         self.sceneNode.transform.position.z)
+
         local particleCount = 1
         if remainingAmount >= 3  then
             particleCount = 3
@@ -320,7 +318,7 @@ function Microbe:storeAgent(agentId, amount)
             local maxAngle = angle + 30    
             self.compoundEmitter.minEmissionAngle = Degree(minAngle)
             self.compoundEmitter.maxEmissionAngle = Degree(maxAngle)
-            self.compoundEmitter:emitAgent(agentId, remainingAmount/particleCount, true, emissionPosition) -- Up to two units may be lost to due rounding after division
+            self.compoundEmitter:emitAgent(agentId, remainingAmount/particleCount, self.sceneNode.transform.position)
         end
     end
 end

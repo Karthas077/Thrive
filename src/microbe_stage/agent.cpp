@@ -66,9 +66,6 @@ AgentComponent::storage() const {
 // AgentEmitterComponent
 ////////////////////////////////////////////////////////////////////////////////
 
-//Ignore C-style casts warnings to allow luabind construct with overloads.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 luabind::scope
 AgentEmitterComponent::luaBindings() {
     using namespace luabind;
@@ -80,7 +77,7 @@ AgentEmitterComponent::luaBindings() {
             def("TYPE_NAME", &AgentEmitterComponent::TYPE_NAME)
         ]
         .def(constructor<>())
-        .def("emitAgent", ( void(AgentEmitterComponent::*)(AgentId, double, bool, Ogre::Vector3) ) &AgentEmitterComponent::emitAgent) //Cast to desired overload
+        .def("emitAgent", &AgentEmitterComponent::emitAgent)
         .def_readwrite("agentId", &AgentEmitterComponent::m_agentId)
         .def_readwrite("emissionRadius", &AgentEmitterComponent::m_emissionRadius)
         .def_readwrite("maxInitialSpeed", &AgentEmitterComponent::m_maxInitialSpeed)
@@ -93,23 +90,13 @@ AgentEmitterComponent::luaBindings() {
         .def_readwrite("potencyPerParticle", &AgentEmitterComponent::m_potencyPerParticle)
     ;
 }
-#pragma GCC diagnostic pop
-
-
-void
-AgentEmitterComponent::emitAgent(
-    Ogre::Vector3 emitterPosition
-) {
-    this->emitAgent(this->m_agentId, this->m_potencyPerParticle, false, emitterPosition);
-}
 
 
 void
 AgentEmitterComponent::emitAgent(
     AgentId agentId,
     double amount,
-    bool useAbsolutePosition,      // If true, the emissionPosition parameter will an absolute position for the emission
-    Ogre::Vector3 emissionPosition
+    Ogre::Vector3 emittorPosition
 ) {
 
     Ogre::Vector3 emissionOffset(0,0,0);
@@ -127,14 +114,11 @@ AgentEmitterComponent::emitAgent(
         emissionSpeed * Ogre::Math::Cos(emissionAngle),
         0.0
     );
-    if (!useAbsolutePosition)
-    {
-        emissionOffset = Ogre::Vector3(
-            this->m_emissionRadius * Ogre::Math::Sin(emissionAngle),
-            this->m_emissionRadius * Ogre::Math::Cos(emissionAngle),
-            0.0
-        );
-    }
+    emissionOffset = Ogre::Vector3(
+        this->m_emissionRadius * Ogre::Math::Sin(emissionAngle),
+        this->m_emissionRadius * Ogre::Math::Cos(emissionAngle),
+        0.0
+    );
     EntityId agentEntityId = Game::instance().engine().currentGameState()->entityManager().generateNewId();
     // Scene Node
     auto agentSceneNodeComponent = make_unique<OgreSceneNodeComponent>();
@@ -148,7 +132,7 @@ AgentEmitterComponent::emitAgent(
     agentRigidBodyComponent->m_properties.shape = std::make_shared<SphereShape>(0.01);
     agentRigidBodyComponent->m_properties.hasContactResponse = false;
     agentRigidBodyComponent->m_properties.kinematic = true;
-    agentRigidBodyComponent->m_dynamicProperties.position = emissionPosition + emissionOffset;
+    agentRigidBodyComponent->m_dynamicProperties.position = emittorPosition + emissionOffset;
     // Agent Component
     auto agentComponent = make_unique<AgentComponent>();
     agentComponent->m_timeToLive = this->m_particleLifetime;
@@ -529,7 +513,7 @@ AgentEmitterSystem::update(int milliseconds) {
         ) {
             timedEmitterComponent->m_timeSinceLastEmission -= timedEmitterComponent->m_emitInterval;
             for (unsigned int i = 0; i < emitterComponent->m_particlesPerEmission; ++i) {
-                 emitterComponent->emitAgent(sceneNodeComponent->m_transform.position);
+                 emitterComponent->emitAgent(emitterComponent->m_agentId, emitterComponent->m_potencyPerParticle, sceneNodeComponent->m_transform.position);
             }
         }
     }
