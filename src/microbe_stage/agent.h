@@ -93,26 +93,17 @@ public:
     *
     * Exposes:
     * - AgentEmitterComponent()
-    * - AgentEmitterComponent::m_agentId
     * - AgentEmitterComponent::m_emissionRadius
     * - AgentEmitterComponent::m_maxInitialSpeed
     * - AgentEmitterComponent::m_minInitialSpeed
     * - AgentEmitterComponent::m_minEmissionAngle
     * - AgentEmitterComponent::m_maxEmissionAngle
-    * - AgentEmitterComponent::m_particlesPerEmission
     * - AgentEmitterComponent::m_particleLifetime
-    * - AgentEmitterComponent::m_particleScale
-    * - AgentEmitterComponent::m_potencyPerParticle
     *
     * @return
     */
     static luabind::scope
     luaBindings();
-
-    /**
-    * @brief The agent id to emit
-    */
-    AgentId m_agentId = NULL_AGENT;
 
     /**
     * @brief How far away the particles are spawned
@@ -144,25 +135,9 @@ public:
     Ogre::Degree m_minEmissionAngle = Ogre::Degree(0);
 
     /**
-    * @brief The number of particles created per emission interval
-    */
-    uint16_t m_particlesPerEmission = 0;
-
-    /**
     * @brief How long new particles will stay alive
     */
     Milliseconds m_particleLifetime = 1000;
-
-    /**
-    * @brief The scale of new particles
-    */
-    Ogre::Vector3 m_particleScale = Ogre::Vector3(1, 1, 1);
-
-    /**
-    * @brief The potency new particles will receive
-    */
-    float m_potencyPerParticle = 1.0f;
-
 
     /**
     * @brief Emits an agent according to the set properties
@@ -181,8 +156,7 @@ public:
     void
     emitAgent(
         AgentId agentId,
-        double amount,
-        Ogre::Vector3 emissionPosition
+        double amount
     );
 
     void
@@ -192,6 +166,11 @@ public:
 
     StorageContainer
     storage() const override;
+
+private:
+
+    friend class AgentEmitterSystem;
+    std::vector<std::pair<AgentId, int>> m_compoundEmissions;
 
 };
 
@@ -209,12 +188,30 @@ public:
     *
     * Exposes:
     * - AgentEmitterComponent()
+    * - AgentEmitterComponent::m_agentId
+    * - AgentEmitterComponent::m_particlesPerEmission
+    * - AgentEmitterComponent::m_potencyPerParticle
     * - AgentEmitterComponent::m_emitInterval
     *
     * @return
     */
     static luabind::scope
     luaBindings();
+
+    /**
+    * @brief The agent id to emit
+    */
+    AgentId m_agentId = NULL_AGENT;
+
+    /**
+    * @brief The number of particles created per emission interval
+    */
+    uint16_t m_particlesPerEmission = 0;
+
+    /**
+    * @brief The potency new particles will receive
+    */
+    float m_potencyPerParticle = 1.0f;
 
     /**
     * @brief How often new particles are spawned

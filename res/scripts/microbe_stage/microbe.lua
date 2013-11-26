@@ -81,9 +81,7 @@ function Microbe.createMicrobeEntity(name)
     compoundEmitter.emissionRadius = 5
     compoundEmitter.minInitialSpeed = 1
     compoundEmitter.maxInitialSpeed = 3
-    compoundEmitter.particlesPerEmission = 1
     compoundEmitter.particleLifetime = 5000
-    compoundEmitter.automaticEmission = false
     local reactionHandler = CollisionComponent()
     reactionHandler:addCollisionGroup("microbe")
     local components = {
@@ -318,7 +316,7 @@ function Microbe:storeAgent(agentId, amount)
             local maxAngle = angle + 30    
             self.compoundEmitter.minEmissionAngle = Degree(minAngle)
             self.compoundEmitter.maxEmissionAngle = Degree(maxAngle)
-            self.compoundEmitter:emitAgent(agentId, remainingAmount/particleCount, self.sceneNode.transform.position)
+            self.compoundEmitter:emitAgent(agentId, remainingAmount/particleCount)
         end
     end
 end

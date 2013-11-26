@@ -71,16 +71,16 @@ local function createSpawnSystem()
         -- Emitter oxygen
         local oxygenEmitter = AgentEmitterComponent()
         entity:addComponent(oxygenEmitter)
-        oxygenEmitter.agentId = AgentRegistry.getAgentId("oxygen")
         oxygenEmitter.emissionRadius = 1
         oxygenEmitter.maxInitialSpeed = 10
         oxygenEmitter.minInitialSpeed = 2
         oxygenEmitter.minEmissionAngle = Degree(0)
         oxygenEmitter.maxEmissionAngle = Degree(360)
-        oxygenEmitter.particlesPerEmission = 1
         oxygenEmitter.particleLifeTime = 5000
-        oxygenEmitter.potencyPerParticle = 2.0
         local timedEmitter = TimedAgentEmitterComponent()
+        timedEmitter.agentId = AgentRegistry.getAgentId("oxygen")
+        timedEmitter.particlesPerEmission = 1
+        timedEmitter.potencyPerParticle = 2.0
         timedEmitter.emitInterval = 1000
         entity:addComponent(timedEmitter)
         return entity
@@ -112,16 +112,16 @@ local function createSpawnSystem()
         -- Emitter glucose
         local glucoseEmitter = AgentEmitterComponent()
         entity:addComponent(glucoseEmitter)
-        glucoseEmitter.agentId = AgentRegistry.getAgentId("glucose")
         glucoseEmitter.emissionRadius = 1
         glucoseEmitter.maxInitialSpeed = 10
         glucoseEmitter.minInitialSpeed = 2
         glucoseEmitter.minEmissionAngle = Degree(0)
         glucoseEmitter.maxEmissionAngle = Degree(360)
-        glucoseEmitter.particlesPerEmission = 1
         glucoseEmitter.particleLifeTime = 5000
-        glucoseEmitter.potencyPerParticle = 1.0
         local timedEmitter = TimedAgentEmitterComponent()
+        timedEmitter.agentId = AgentRegistry.getAgentId("glucose")
+        timedEmitter.particlesPerEmission = 1
+        timedEmitter.potencyPerParticle = 1.0
         timedEmitter.emitInterval = 2000
         entity:addComponent(timedEmitter)
         return entity
@@ -164,17 +164,17 @@ local function setupEmitter()
     -- Emitter glucose
     local glucoseEmitter = AgentEmitterComponent()
     entity:addComponent(glucoseEmitter)
-    glucoseEmitter.agentId = AgentRegistry.getAgentId("glucose")
     glucoseEmitter.emissionRadius = 1
     glucoseEmitter.maxInitialSpeed = 10
     glucoseEmitter.minInitialSpeed = 2
     glucoseEmitter.minEmissionAngle = Degree(0)
     glucoseEmitter.maxEmissionAngle = Degree(360)
     glucoseEmitter.meshName = "molecule.mesh"
-    glucoseEmitter.particlesPerEmission = 1
     glucoseEmitter.particleLifeTime = 5000
-    glucoseEmitter.potencyPerParticle = 3.0
     local timedEmitter = TimedAgentEmitterComponent()
+    timedEmitter.agentId = AgentRegistry.getAgentId("glucose")
+    timedEmitter.particlesPerEmission = 1
+    timedEmitter.potencyPerParticle = 3.0
     timedEmitter.emitInterval = 1000
     entity:addComponent(timedEmitter)
 end

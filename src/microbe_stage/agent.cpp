@@ -78,16 +78,12 @@ AgentEmitterComponent::luaBindings() {
         ]
         .def(constructor<>())
         .def("emitAgent", &AgentEmitterComponent::emitAgent)
-        .def_readwrite("agentId", &AgentEmitterComponent::m_agentId)
         .def_readwrite("emissionRadius", &AgentEmitterComponent::m_emissionRadius)
         .def_readwrite("maxInitialSpeed", &AgentEmitterComponent::m_maxInitialSpeed)
         .def_readwrite("minInitialSpeed", &AgentEmitterComponent::m_minInitialSpeed)
         .def_readwrite("minEmissionAngle", &AgentEmitterComponent::m_minEmissionAngle)
         .def_readwrite("maxEmissionAngle", &AgentEmitterComponent::m_maxEmissionAngle)
-        .def_readwrite("particlesPerEmission", &AgentEmitterComponent::m_particlesPerEmission)
         .def_readwrite("particleLifetime", &AgentEmitterComponent::m_particleLifetime)
-        .def_readwrite("particleScale", &AgentEmitterComponent::m_particleScale)
-        .def_readwrite("potencyPerParticle", &AgentEmitterComponent::m_potencyPerParticle)
     ;
 }
 
@@ -95,64 +91,9 @@ AgentEmitterComponent::luaBindings() {
 void
 AgentEmitterComponent::emitAgent(
     AgentId agentId,
-    double amount,
-    Ogre::Vector3 emittorPosition
+    double amount
 ) {
-
-    Ogre::Vector3 emissionOffset(0,0,0);
-
-    Ogre::Degree emissionAngle{static_cast<Ogre::Real>(Game::instance().engine().rng().getDouble(
-        this->m_minEmissionAngle.valueDegrees(),
-        this->m_maxEmissionAngle.valueDegrees()
-    ))};
-    Ogre::Real emissionSpeed = Game::instance().engine().rng().getDouble(
-        this->m_minInitialSpeed,
-        this->m_maxInitialSpeed
-    );
-    Ogre::Vector3 emissionVelocity(
-        emissionSpeed * Ogre::Math::Sin(emissionAngle),
-        emissionSpeed * Ogre::Math::Cos(emissionAngle),
-        0.0
-    );
-    emissionOffset = Ogre::Vector3(
-        this->m_emissionRadius * Ogre::Math::Sin(emissionAngle),
-        this->m_emissionRadius * Ogre::Math::Cos(emissionAngle),
-        0.0
-    );
-    EntityId agentEntityId = Game::instance().engine().currentGameState()->entityManager().generateNewId();
-    // Scene Node
-    auto agentSceneNodeComponent = make_unique<OgreSceneNodeComponent>();
-    agentSceneNodeComponent->m_transform.scale = PARTICLE_SCALE;
-    agentSceneNodeComponent->m_meshName = AgentRegistry::getAgentMeshName(agentId);
-    // Collision Hull
-    auto agentRigidBodyComponent = make_unique<RigidBodyComponent>(
-        btBroadphaseProxy::SensorTrigger,
-        btBroadphaseProxy::AllFilter & (~ btBroadphaseProxy::SensorTrigger)
-    );
-    agentRigidBodyComponent->m_properties.shape = std::make_shared<SphereShape>(0.01);
-    agentRigidBodyComponent->m_properties.hasContactResponse = false;
-    agentRigidBodyComponent->m_properties.kinematic = true;
-    agentRigidBodyComponent->m_dynamicProperties.position = emittorPosition + emissionOffset;
-    // Agent Component
-    auto agentComponent = make_unique<AgentComponent>();
-    agentComponent->m_timeToLive = this->m_particleLifetime;
-    agentComponent->m_velocity = emissionVelocity;
-    agentComponent->m_agentId = agentId;
-    agentComponent->m_potency = amount;
-    auto collisionHandler = make_unique<CollisionComponent>();
-    collisionHandler->addCollisionGroup("agent");
-    // Build component list
-    std::list<std::unique_ptr<Component>> components;
-    components.emplace_back(std::move(agentSceneNodeComponent));
-    components.emplace_back(std::move(agentComponent));
-    components.emplace_back(std::move(agentRigidBodyComponent));
-    components.emplace_back(std::move(collisionHandler));
-    for (auto& component : components) {
-        Game::instance().engine().currentGameState()->entityManager().addComponent(
-            agentEntityId,
-            std::move(component)
-        );
-    }
+    m_compoundEmissions.push_back(std::pair<AgentId, int>(agentId, amount));
 }
 
 
@@ -162,31 +103,23 @@ AgentEmitterComponent::load(
     const StorageContainer& storage
 ) {
     Component::load(storage);
-    m_agentId = storage.get<AgentId>("agentId", NULL_AGENT);
     m_emissionRadius = storage.get<Ogre::Real>("emissionRadius", 0.0);
     m_maxInitialSpeed = storage.get<Ogre::Real>("maxInitialSpeed", 0.0);
     m_minInitialSpeed = storage.get<Ogre::Real>("minInitialSpeed", 0.0);
     m_maxEmissionAngle = storage.get<Ogre::Degree>("maxEmissionAngle");
     m_minEmissionAngle = storage.get<Ogre::Degree>("minEmissionAngle");
-    m_particlesPerEmission = storage.get<uint16_t>("particlesPerEmission");
     m_particleLifetime = storage.get<Milliseconds>("particleLifetime");
-    m_particleScale = storage.get<Ogre::Vector3>("particleScale");
-    m_potencyPerParticle = storage.get<float>("potencyPerParticle");
 }
 
 StorageContainer
 AgentEmitterComponent::storage() const {
     StorageContainer storage = Component::storage();
-    storage.set<AgentId>("agentId", m_agentId);
     storage.set<Ogre::Real>("emissionRadius", m_emissionRadius);
     storage.set<Ogre::Real>("maxInitialSpeed", m_maxInitialSpeed);
     storage.set<Ogre::Real>("minInitialSpeed", m_minInitialSpeed);
     storage.set<Ogre::Degree>("maxEmissionAngle", m_maxEmissionAngle);
     storage.set<Ogre::Degree>("minEmissionAngle", m_minEmissionAngle);
-    storage.set<uint16_t>("particlesPerEmission", m_particlesPerEmission);
     storage.set<Milliseconds>("particleLifetime", m_particleLifetime);
-    storage.set<Ogre::Vector3>("particleScale", m_particleScale);
-    storage.set<float>("potencyPerParticle", m_potencyPerParticle);
     return storage;
 }
 
@@ -209,6 +142,9 @@ TimedAgentEmitterComponent::luaBindings() {
         ]
         .def(constructor<>())
         .def_readwrite("emitInterval", &TimedAgentEmitterComponent::m_emitInterval)
+        .def_readwrite("agentId", &TimedAgentEmitterComponent::m_agentId)
+        .def_readwrite("particlesPerEmission", &TimedAgentEmitterComponent::m_particlesPerEmission)
+        .def_readwrite("potencyPerParticle", &TimedAgentEmitterComponent::m_potencyPerParticle)
     ;
 }
 
@@ -218,6 +154,9 @@ TimedAgentEmitterComponent::load(
     const StorageContainer& storage
 ) {
     Component::load(storage);
+    m_agentId = storage.get<AgentId>("agentId", NULL_AGENT);
+    m_particlesPerEmission = storage.get<uint16_t>("particlesPerEmission");
+    m_potencyPerParticle = storage.get<float>("potencyPerParticle");
     m_emitInterval = storage.get<Milliseconds>("emitInterval", 1000);
     m_timeSinceLastEmission = storage.get<Milliseconds>("timeSinceLastEmission");
 }
@@ -226,6 +165,9 @@ TimedAgentEmitterComponent::load(
 StorageContainer
 TimedAgentEmitterComponent::storage() const {
     StorageContainer storage = Component::storage();
+    storage.set<AgentId>("agentId", m_agentId);
+    storage.set<uint16_t>("particlesPerEmission", m_particlesPerEmission);
+    storage.set<float>("potencyPerParticle", m_potencyPerParticle);
     storage.set<Milliseconds>("emitInterval", m_emitInterval);
     storage.set<Milliseconds>("timeSinceLastEmission", m_timeSinceLastEmission);
     return storage;
@@ -465,8 +407,8 @@ struct AgentEmitterSystem::Implementation {
 
     EntityFilter<
         AgentEmitterComponent,
-        TimedAgentEmitterComponent,
-        OgreSceneNodeComponent
+        OgreSceneNodeComponent,
+        Optional<TimedAgentEmitterComponent>
     > m_entities;
 
     Ogre::SceneManager* m_sceneManager = nullptr;
@@ -499,21 +441,96 @@ AgentEmitterSystem::shutdown() {
     System::shutdown();
 }
 
+// Helper function for AgentEmitterSystem to emit agents
+static void
+emitAgent(
+    AgentId agentId,
+    double amount,
+    Ogre::Vector3 emittorPosition,
+    AgentEmitterComponent* emitterComponent
+) {
+
+    Ogre::Vector3 emissionOffset(0,0,0);
+
+    Ogre::Degree emissionAngle{static_cast<Ogre::Real>(Game::instance().engine().rng().getDouble(
+        emitterComponent->m_minEmissionAngle.valueDegrees(),
+        emitterComponent->m_maxEmissionAngle.valueDegrees()
+    ))};
+    Ogre::Real emissionSpeed = Game::instance().engine().rng().getDouble(
+        emitterComponent->m_minInitialSpeed,
+        emitterComponent->m_maxInitialSpeed
+    );
+    Ogre::Vector3 emissionVelocity(
+        emissionSpeed * Ogre::Math::Sin(emissionAngle),
+        emissionSpeed * Ogre::Math::Cos(emissionAngle),
+        0.0
+    );
+    emissionOffset = Ogre::Vector3(
+        emitterComponent->m_emissionRadius * Ogre::Math::Sin(emissionAngle),
+        emitterComponent->m_emissionRadius * Ogre::Math::Cos(emissionAngle),
+        0.0
+    );
+    EntityId agentEntityId = Game::instance().engine().currentGameState()->entityManager().generateNewId();
+    // Scene Node
+    auto agentSceneNodeComponent = make_unique<OgreSceneNodeComponent>();
+    agentSceneNodeComponent->m_transform.scale = PARTICLE_SCALE;
+    agentSceneNodeComponent->m_meshName = AgentRegistry::getAgentMeshName(agentId);
+    // Collision Hull
+    auto agentRigidBodyComponent = make_unique<RigidBodyComponent>(
+        btBroadphaseProxy::SensorTrigger,
+        btBroadphaseProxy::AllFilter & (~ btBroadphaseProxy::SensorTrigger)
+    );
+    agentRigidBodyComponent->m_properties.shape = std::make_shared<SphereShape>(0.01);
+    agentRigidBodyComponent->m_properties.hasContactResponse = false;
+    agentRigidBodyComponent->m_properties.kinematic = true;
+    agentRigidBodyComponent->m_dynamicProperties.position = emittorPosition + emissionOffset;
+    // Agent Component
+    auto agentComponent = make_unique<AgentComponent>();
+    agentComponent->m_timeToLive = emitterComponent->m_particleLifetime;
+    agentComponent->m_velocity = emissionVelocity;
+    agentComponent->m_agentId = agentId;
+    agentComponent->m_potency = amount;
+    auto collisionHandler = make_unique<CollisionComponent>();
+    collisionHandler->addCollisionGroup("agent");
+    // Build component list
+    std::list<std::unique_ptr<Component>> components;
+    components.emplace_back(std::move(agentSceneNodeComponent));
+    components.emplace_back(std::move(agentComponent));
+    components.emplace_back(std::move(agentRigidBodyComponent));
+    components.emplace_back(std::move(collisionHandler));
+    for (auto& component : components) {
+        Game::instance().engine().currentGameState()->entityManager().addComponent(
+            agentEntityId,
+            std::move(component)
+        );
+    }
+}
+
+
 
 void
 AgentEmitterSystem::update(int milliseconds) {
     for (auto& value : m_impl->m_entities) {
         AgentEmitterComponent* emitterComponent = std::get<0>(value.second);
-        TimedAgentEmitterComponent* timedEmitterComponent = std::get<1>(value.second);
-        OgreSceneNodeComponent* sceneNodeComponent = std::get<2>(value.second);
-        timedEmitterComponent->m_timeSinceLastEmission += milliseconds;
-        while (
-            timedEmitterComponent->m_emitInterval > 0 and
-            timedEmitterComponent->m_timeSinceLastEmission >= timedEmitterComponent->m_emitInterval
-        ) {
-            timedEmitterComponent->m_timeSinceLastEmission -= timedEmitterComponent->m_emitInterval;
-            for (unsigned int i = 0; i < emitterComponent->m_particlesPerEmission; ++i) {
-                 emitterComponent->emitAgent(emitterComponent->m_agentId, emitterComponent->m_potencyPerParticle, sceneNodeComponent->m_transform.position);
+        OgreSceneNodeComponent* sceneNodeComponent = std::get<1>(value.second);
+        TimedAgentEmitterComponent* timedEmitterComponent = std::get<2>(value.second);
+
+        for (auto emission : emitterComponent->m_compoundEmissions)
+        {
+            emitAgent(std::get<0>(emission), std::get<1>(emission), sceneNodeComponent->m_transform.position, emitterComponent);
+        }
+        emitterComponent->m_compoundEmissions.clear();
+        if (timedEmitterComponent)
+        {
+            timedEmitterComponent->m_timeSinceLastEmission += milliseconds;
+            while (
+                timedEmitterComponent->m_emitInterval > 0 and
+                timedEmitterComponent->m_timeSinceLastEmission >= timedEmitterComponent->m_emitInterval
+            ) {
+                timedEmitterComponent->m_timeSinceLastEmission -= timedEmitterComponent->m_emitInterval;
+                for (unsigned int i = 0; i < timedEmitterComponent->m_particlesPerEmission; ++i) {
+                     emitAgent(timedEmitterComponent->m_agentId, timedEmitterComponent->m_potencyPerParticle, sceneNodeComponent->m_transform.position, emitterComponent);
+                }
             }
         }
     }
